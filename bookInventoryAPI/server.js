@@ -9,6 +9,7 @@ require("dotenv").config();
 
 app.use(express.json());
 
+
 app.use((req, res, next) => {
     console.log(`Request: ${req.method} ${req.originalUrl}`);
     res.on("finish", () => {
