@@ -12,7 +12,7 @@ module.exports = {
       body: {
         type: Sequelize.TEXT
       },
-      author: {
+      authorId: {
         type: Sequelize.INTEGER
       }
     });
