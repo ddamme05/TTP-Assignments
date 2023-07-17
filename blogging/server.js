@@ -74,7 +74,7 @@ app.post('/signup', async (req, res) => {
         }
         console.error(error);
         res.status(500).json({
-            message: 'Failed to create user'
+            message: 'Failed to create user.'
         });
     }
 });
@@ -89,7 +89,7 @@ app.post("/login", async (req, res) => {
 
         if (user === null) {
             return res.status(401).json({
-                message: "Incorrect credentials"
+                message: "Incorrect credentials."
             });
         }
 
@@ -99,7 +99,7 @@ app.post("/login", async (req, res) => {
             req.session.authorId = user.id;
 
             res.status(200).json({
-                message: "Logged in successfully",
+                message: "Logged in successfully.",
                 user: {
                     name: user.name,
                     email: user.email
@@ -107,7 +107,7 @@ app.post("/login", async (req, res) => {
             });
         } else {
             return res.status(401).json({
-                message: "Incorrect credentials"
+                message: "Incorrect credentials."
             });
         }
     } catch (error) {
@@ -119,12 +119,12 @@ app.post("/login", async (req, res) => {
             });
         } else if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
-                error: 'Email already in use'
+                error: 'Email already in use!'
             });
         }
 
         res.status(500).json({
-            message: "An error occurred during the login process"
+            message: "An error occurred during the login process."
         });
     }
 });
@@ -155,7 +155,7 @@ app.get("/posts", async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            message: "Failed to retrieve posts"
+            message: "Failed to retrieve posts."
         });
     }
 });
@@ -169,7 +169,7 @@ app.post("/posts", authenticateUser, async (req, res) => {
         });
 
         res.status(201).json({
-            message: "Post created successfully",
+            message: "Post created successfully.",
             post,
         });
     } catch (error) {
@@ -181,12 +181,12 @@ app.post("/posts", authenticateUser, async (req, res) => {
             });
         } else if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({
-                error: 'Post with the same title already exists'
+                error: 'Post with the same title already exists.'
             });
         }
 
         res.status(500).json({
-            message: "Failed to create a post"
+            message: "Failed to create a post."
         });
     }
 });
@@ -203,7 +203,7 @@ app.get("/posts/:id", async (req, res) => {
 
         if (!post) {
             return res.status(404).json({
-                message: "Post not found"
+                message: "Post not found!"
             });
         }
 
@@ -211,7 +211,7 @@ app.get("/posts/:id", async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            message: "Failed to retrieve the post"
+            message: "Failed to retrieve the post."
         });
     }
 });
@@ -222,13 +222,13 @@ app.put("/posts/:id", authenticateUser, async (req, res) => {
 
         if (!post) {
             return res.status(404).json({
-                message: "Post not found"
+                message: "Post not found!"
             });
         }
 
         if (post.authorId !== req.session.authorId) {
             return res.status(403).json({
-                message: "You are not authorized to update this post"
+                message: "You are not authorized to update this post."
             });
         }
 
@@ -237,7 +237,7 @@ app.put("/posts/:id", authenticateUser, async (req, res) => {
         await post.save();
 
         res.status(200).json({
-            message: "Post updated successfully",
+            message: "Post updated successfully!",
             post,
         });
     } catch (error) {
@@ -250,7 +250,7 @@ app.put("/posts/:id", authenticateUser, async (req, res) => {
         }
 
         res.status(500).json({
-            message: "Failed to update the post"
+            message: "Failed to update the post."
         });
     }
 });
@@ -261,122 +261,159 @@ app.delete("/posts/:id", authenticateUser, async (req, res) => {
 
         if (!post) {
             return res.status(404).json({
-                message: "Post not found"
+                message: "Post not found!"
             });
         }
 
         if (post.authorId !== req.session.authorId) {
             return res.status(403).json({
-                message: "You are not authorized to delete this post"
+                message: "You are not authorized to delete this post."
             });
         }
 
         await post.destroy();
 
         res.status(200).json({
-            message: "Post deleted successfully"
+            message: "Post deleted successfully!"
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            message: "Failed to delete the post"
+            message: "Failed to delete the post."
         });
     }
 });
 
 app.post("/comments", async (req, res) => {
     try {
-      const comment = await Comment.create({
-        body: req.body.body,
-        postId: req.body.postId,
-        authorId: req.session.authorId,
-      });
-  
-      res.status(201).json({
-        message: "Comment created successfully",
-        comment,
-      });
+        const comment = await Comment.create({
+            body: req.body.body,
+            postId: req.body.postId,
+            authorId: req.session.authorId,
+        });
+
+        res.status(201).json({
+            message: "Comment created successfully!",
+            comment,
+        });
     } catch (error) {
-      if (error.name === "SequelizeValidationError") {
-        res.status(422).json({ error: error.message });
-      } else if (error.name === "SequelizeUniqueConstraintError") {
-        res.status(400).json({ error: "Duplicate comment" });
-      } else {
+        if (error.name === "SequelizeValidationError") {
+            res.status(422).json({
+                error: error.message
+            });
+        } else if (error.name === "SequelizeUniqueConstraintError") {
+            res.status(400).json({
+                error: "Duplicate comment!"
+            });
+        } else {
+            console.error(error);
+            res.status(500).json({
+                message: "Failed to create a comment."
+            });
+        }
+    }
+});
+
+app.get("/posts/:postId/comments", async (req, res) => {
+    try {
+        const comments = await Comment.findAll({
+            where: {
+                postId: req.params.postId
+            },
+            include: [{
+                model: User,
+                as: "author",
+                attributes: ["name", "email"]
+            }],
+        });
+
+        res.status(200).json(comments);
+    } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Failed to create a comment" });
-      }
+        res.status(500).json({
+            message: "Failed to retrieve comments."
+        });
     }
-  });
-  
-  app.get("/posts/:postId/comments", async (req, res) => {
+});
+
+app.get("/comments/:commentId", async (req, res) => {
     try {
-      const comments = await Comment.findAll({
-        where: { postId: req.params.postId },
-        include: [{ model: User, as: "author", attributes: ["name", "email"] }],
-      });
-  
-      res.status(200).json(comments);
+        const comment = await Comment.findByPk(req.params.commentId, {
+            include: [{
+                model: User,
+                as: "author",
+                attributes: ["name", "email"]
+            }],
+        });
+
+        if (!comment) {
+            return res.status(404).json({
+                message: "Comment not found."
+            });
+        }
+
+        res.status(200).json(comment);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to retrieve comments" });
-    }
-  });
-  
-  app.get("/comments/:commentId", async (req, res) => {
-    try {
-      const comment = await Comment.findByPk(req.params.commentId, {
-        include: [{ model: User, as: "author", attributes: ["name", "email"] }],
-      });
-  
-      if (!comment) {
-        return res.status(404).json({ message: "Comment not found" });
-      }
-  
-      res.status(200).json(comment);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to retrieve the comment" });
-    }
-  });
-  
-  app.put("/comments/:commentId", async (req, res) => {
-    try {
-      const comment = await Comment.findByPk(req.params.commentId);
-  
-      if (!comment) {
-        return res.status(404).json({ message: "Comment not found" });
-      }
-  
-      comment.body = req.body.body;
-      await comment.save();
-  
-      res.status(200).json({ message: "Comment updated successfully", comment });
-    } catch (error) {
-      if (error.name === "SequelizeValidationError") {
-        res.status(422).json({ error: error.message });
-      } else {
         console.error(error);
-        res.status(500).json({ message: "Failed to update the comment" });
-      }
+        res.status(500).json({
+            message: "Failed to retrieve the comment."
+        });
     }
-  });
-  
-  app.delete("/comments/:commentId", async (req, res) => {
+});
+
+app.put("/comments/:commentId", async (req, res) => {
     try {
-      const comment = await Comment.findByPk(req.params.commentId);
-  
-      if (!comment) {
-        return res.status(404).json({ message: "Comment not found" });
-      }
-  
-      await comment.destroy();
-  
-      res.status(200).json({ message: "Comment deleted successfully" });
+        const comment = await Comment.findByPk(req.params.commentId);
+
+        if (!comment) {
+            return res.status(404).json({
+                message: "Comment not found."
+            });
+        }
+
+        comment.body = req.body.body;
+        await comment.save();
+
+        res.status(200).json({
+            message: "Comment updated successfully!",
+            comment
+        });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to delete the comment" });
+        if (error.name === "SequelizeValidationError") {
+            res.status(422).json({
+                error: error.message
+            });
+        } else {
+            console.error(error);
+            res.status(500).json({
+                message: "Failed to update the comment."
+            });
+        }
     }
-  });
+});
+
+app.delete("/comments/:commentId", async (req, res) => {
+    try {
+        const comment = await Comment.findByPk(req.params.commentId);
+
+        if (!comment) {
+            return res.status(404).json({
+                message: "Comment not found."
+            });
+        }
+
+        await comment.destroy();
+
+        res.status(200).json({
+            message: "Comment deleted successfully!"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Failed to delete the comment."
+        });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
