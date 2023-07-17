@@ -26,7 +26,7 @@ The project structure is organized as follows:
 
 To set up and run the application, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/your-username/sequelize-blogging-app.git`
+1. Clone the repository: `git clone https://github.com/ddamme05/TTP-Assignments.git`
 2. Navigate to the project directory: `cd \blogging\`
 3. Install dependencies: `npm install`
 4. Create a database for the program.
