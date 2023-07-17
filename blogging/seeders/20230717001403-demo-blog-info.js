@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
 
   async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('Users', [
+    await queryInterface.bulkInsert('users', [
       {
         name: 'John Smith',
         email: 'john@example.com',
@@ -22,7 +22,7 @@ module.exports = {
       }  
     ]);
 
-    await queryInterface.bulkInsert('Posts', [
+    await queryInterface.bulkInsert('posts', [
       {
         title: '10 Tips for JavaScript Developers',
         body: 'This post shares useful tips for JS developers...', 
@@ -39,7 +39,7 @@ module.exports = {
       }
     ]);
 
-    await queryInterface.bulkInsert('Comments', [
+    await queryInterface.bulkInsert('comments', [
       {
         body: 'Great tips, thanks for sharing!',
         authorId: 2,
@@ -59,8 +59,8 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('Comments', null, {});
-    await queryInterface.bulkDelete('Posts', null, {});
-    await queryInterface.bulkDelete('Users', null, {});
+    await queryInterface.bulkDelete('comments', null, {});
+    await queryInterface.bulkDelete('posts', null, {});
+    await queryInterface.bulkDelete('users', null, {});
   }
 };

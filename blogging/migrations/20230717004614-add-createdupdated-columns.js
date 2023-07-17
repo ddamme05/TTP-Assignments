@@ -2,25 +2,25 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.addColumn('Posts', 'createdAt', {
+    await queryInterface.addColumn('posts', 'createdAt', {
       type: Sequelize.DATE
     });
-    await queryInterface.addColumn('Posts', 'updatedAt', {  
+    await queryInterface.addColumn('posts', 'updatedAt', {  
       type: Sequelize.DATE
     });
-    await queryInterface.addColumn('Comments', 'createdAt', {
+    await queryInterface.addColumn('comments', 'createdAt', {
       type: Sequelize.DATE
     });
-    await queryInterface.addColumn('Comments', 'updatedAt', {
+    await queryInterface.addColumn('comments', 'updatedAt', {
       type: Sequelize.DATE 
     });
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.removeColumn('Posts', 'createdAt');
-    await queryInterface.removeColumn('Posts', 'updatedAt');
+    await queryInterface.removeColumn('posts', 'createdAt');
+    await queryInterface.removeColumn('posts', 'updatedAt');
 
-    await queryInterface.removeColumn('Comments', 'createdAt'); 
-    await queryInterface.removeColumn('Comments', 'updatedAt');
+    await queryInterface.removeColumn('comments', 'createdAt'); 
+    await queryInterface.removeColumn('comments', 'updatedAt');
   }
 };
