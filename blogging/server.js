@@ -564,6 +564,40 @@ app.post('/posts/:postId/comments', async (req, res) => {
     }
 });
 
+app.delete('/posts/:postId/comments/:commentId', async (req, res) => {
+    const {
+        postId,
+        commentId
+    } = req.params;
+
+    try {
+        const comment = await Comment.findOne({
+            where: {
+                id: commentId,
+                postId
+            }
+        });
+
+        if (!comment) {
+            return res.status(404).json({
+                message: 'Comment not found.'
+            });
+        }
+
+        await comment.destroy();
+
+        res.status(200).json({
+            message: 'Comment deleted!'
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: 'An error occurred during deletion!'
+        });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
