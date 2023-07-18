@@ -131,8 +131,8 @@ app.post("/login", async (req, res) => {
 
 
 app.delete("/logout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
+    req.session.destroy((error) => {
+        if (error) {
             return res.sendStatus(500);
         }
 
@@ -142,23 +142,94 @@ app.delete("/logout", (req, res) => {
 });
 
 app.get("/posts", async (req, res) => {
-    try {
-        const posts = await Post.findAll({
-            include: [{
-                model: User,
-                as: "author",
-                attributes: ["name", "email"]
-            }]
-        });
+    const {
+        withComments,
+        withUser
+    } = req.query;
 
-        res.status(200).json(posts);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Failed to retrieve posts."
-        });
+    if (withComments === "true" && withUser === "true") {
+        // Retrieve posts with associated User and Comments
+        try {
+            const posts = await Post.findAll({
+                include: [{
+                        model: User,
+                        as: "author",
+                        attributes: ["name", "email"],
+                    },
+                    {
+                        model: Comment,
+                        as: "comments",
+                        include: [{
+                            model: User,
+                            as: "author",
+                            attributes: ["name", "email"],
+                        }, ],
+                    },
+                ],
+            });
+
+            res.status(200).json(posts);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                message: "Failed to retrieve posts.",
+            });
+        }
+    } else if (withComments === "true") {
+        // Retrieve posts with associated Comments only
+        try {
+            const posts = await Post.findAll({
+                include: [{
+                    model: Comment,
+                    as: "comments",
+                    include: [{
+                        model: User,
+                        as: "author",
+                        attributes: ["name", "email"],
+                    }, ],
+                }, ],
+            });
+
+            res.status(200).json(posts);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                message: "Failed to retrieve posts.",
+            });
+        }
+    } else if (withUser === "true") {
+        // Retrieve posts with associated User only
+        try {
+            const posts = await Post.findAll({
+                include: [{
+                    model: User,
+                    as: "author",
+                    attributes: ["name", "email"],
+                }, ],
+            });
+
+            res.status(200).json(posts);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                message: "Failed to retrieve posts.",
+            });
+        }
+    } else {
+        // Retrieve posts without associated User and Comments
+        try {
+            const posts = await Post.findAll();
+
+            res.status(200).json(posts);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({
+                message: "Failed to retrieve posts.",
+            });
+        }
     }
 });
+
 
 app.post("/posts", authenticateUser, async (req, res) => {
     try {
@@ -284,7 +355,7 @@ app.delete("/posts/:id", authenticateUser, async (req, res) => {
     }
 });
 
-app.post("/comments", async (req, res) => {
+app.post("/comments", authenticateUser, async (req, res) => {
     try {
         const comment = await Comment.create({
             body: req.body.body,
@@ -361,7 +432,7 @@ app.get("/comments/:commentId", async (req, res) => {
     }
 });
 
-app.put("/comments/:commentId", async (req, res) => {
+app.put("/comments/:commentId", authenticateUser, async (req, res) => {
     try {
         const comment = await Comment.findByPk(req.params.commentId);
 
@@ -392,7 +463,7 @@ app.put("/comments/:commentId", async (req, res) => {
     }
 });
 
-app.delete("/comments/:commentId", async (req, res) => {
+app.delete("/comments/:commentId", authenticateUser, async (req, res) => {
     try {
         const comment = await Comment.findByPk(req.params.commentId);
 
@@ -414,6 +485,119 @@ app.delete("/comments/:commentId", async (req, res) => {
         });
     }
 });
+
+app.get('/users/:userId/comments', authenticateUser, async (req, res) => {
+    const {
+        userId
+    } = req.params;
+
+    try {
+        const comments = await Comment.findAll({
+            include: {
+                model: User,
+                as: 'author',
+                where: {
+                    id: userId
+                },
+                attributes: ['name', 'email']
+            }
+        });
+
+        res.status(200).json(comments);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Failed to retrieve comments from the user.",
+        })
+    }
+});
+
+app.get('/posts/:postId/comments', async (req, res) => {
+    const {
+        postId
+    } = req.params;
+
+    try {
+        const comments = await Comment.findAll({
+            where: {
+                postId
+            }
+        });
+
+        res.json(comments);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to retrieve comments from the post'
+        });
+    }
+});
+
+app.post('/posts/:postId/comments', authenticateUser, async (req, res) => {
+    const {
+        postId
+    } = req.params;
+    const {
+        body,
+        authorId
+    } = req.body;
+
+    try {
+        const comment = await Comment.create({
+            body,
+            postId,
+            authorId
+        });
+
+        res.status(201).json({
+            message: `Comment created successfully for postId ${postId}`,
+            body,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to create a comment in post.'
+        });
+    }
+});
+
+app.delete('/posts/:postId/comments/:commentId', authenticateUser, async (req, res) => {
+    const {
+        postId,
+        commentId
+    } = req.params;
+
+    try {
+        const comment = await Comment.findOne({
+            where: {
+                id: commentId,
+                postId
+            }
+        });
+
+        if (!comment) {
+            return res.status(404).json({
+                message: 'Comment not found.'
+            });
+        }
+
+        await comment.destroy();
+
+        res.status(200).json({
+            message: 'Comment deleted!'
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'An error occurred during deletion!'
+        });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
