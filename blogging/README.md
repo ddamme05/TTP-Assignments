@@ -62,7 +62,7 @@ The application provides the following API endpoints:
 - `POST /login`: Log in an existing user.
 - `DELETE /logout`: Log out the current user.
 
-- Test the program using the `Postman` aplication using link below
+- Test the program using the `Postman` application using link below
 
 - For routes using advanced queries, make sure to check the `Params` section of `Postman`!
 
