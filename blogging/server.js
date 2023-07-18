@@ -142,23 +142,100 @@ app.delete("/logout", (req, res) => {
 });
 
 app.get("/posts", async (req, res) => {
-    try {
+    const { withComments, withUser } = req.query;
+  
+    if (withComments === "true" && withUser === "true") {
+      // Retrieve posts with associated User and Comments
+      try {
         const posts = await Post.findAll({
-            include: [{
-                model: User,
-                as: "author",
-                attributes: ["name", "email"]
-            }]
+          include: [
+            {
+              model: User,
+              as: "author",
+              attributes: ["name", "email"],
+            },
+            {
+              model: Comment,
+              as: "comments",
+              include: [
+                {
+                  model: User,
+                  as: "author",
+                  attributes: ["name", "email"],
+                },
+              ],
+            },
+          ],
         });
-
+  
         res.status(200).json(posts);
-    } catch (error) {
+      } catch (error) {
         console.error(error);
         res.status(500).json({
-            message: "Failed to retrieve posts."
+          message: "Failed to retrieve posts.",
         });
+      }
+    } else if (withComments === "true") {
+      // Retrieve posts with associated Comments only
+      try {
+        const posts = await Post.findAll({
+          include: [
+            {
+              model: Comment,
+              as: "comments",
+              include: [
+                {
+                  model: User,
+                  as: "author",
+                  attributes: ["name", "email"],
+                },
+              ],
+            },
+          ],
+        });
+  
+        res.status(200).json(posts);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          message: "Failed to retrieve posts.",
+        });
+      }
+    } else if (withUser === "true") {
+      // Retrieve posts with associated User only
+      try {
+        const posts = await Post.findAll({
+          include: [
+            {
+              model: User,
+              as: "author",
+              attributes: ["name", "email"],
+            },
+          ],
+        });
+  
+        res.status(200).json(posts);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          message: "Failed to retrieve posts.",
+        });
+      }
+    } else {
+      // Retrieve posts without associated User and Comments
+      try {
+        const posts = await Post.findAll();
+  
+        res.status(200).json(posts);
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({
+          message: "Failed to retrieve posts.",
+        });
+      }
     }
-});
+  });
+  
 
 app.post("/posts", authenticateUser, async (req, res) => {
     try {
