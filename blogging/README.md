@@ -42,7 +42,7 @@ The application provides the following API endpoints:
 
 ### Posts
 
-- `GET /posts`: Retrieve all posts.
+- `GET /posts`: Retrieve all posts, includes parameters.
 - `POST /posts`: Create a new post.
 - `GET /posts/:id`: Retrieve a specific post by ID.
 - `PUT /posts/:id`: Update a specific post by ID.
@@ -55,6 +55,10 @@ The application provides the following API endpoints:
 - `GET /comments/:id`: Retrieve a specific comment by ID.
 - `PUT /comments/:id`: Update a specific comment by ID.
 - `DELETE /comments/:id`: Delete a specific comment by ID.
+- `GET /users/:userId/comments`: Retrieves all comments for a specific user.
+- `GET /posts/:postId/comments`: Retrieves all comments for a specififc post.
+- `POST /posts/:postId/comments`: Adds a comment to a post.
+- `DELETE /posts/:postId/comments/:commentId`: Removes a comment from a post.
 
 ### Authentication
 
