@@ -131,8 +131,8 @@ app.post("/login", async (req, res) => {
 
 
 app.delete("/logout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
+    req.session.destroy((error) => {
+        if (error) {
             return res.sendStatus(500);
         }
 
@@ -355,7 +355,7 @@ app.delete("/posts/:id", authenticateUser, async (req, res) => {
     }
 });
 
-app.post("/comments", async (req, res) => {
+app.post("/comments", authenticateUser, async (req, res) => {
     try {
         const comment = await Comment.create({
             body: req.body.body,
@@ -432,7 +432,7 @@ app.get("/comments/:commentId", async (req, res) => {
     }
 });
 
-app.put("/comments/:commentId", async (req, res) => {
+app.put("/comments/:commentId", authenticateUser, async (req, res) => {
     try {
         const comment = await Comment.findByPk(req.params.commentId);
 
@@ -463,7 +463,7 @@ app.put("/comments/:commentId", async (req, res) => {
     }
 });
 
-app.delete("/comments/:commentId", async (req, res) => {
+app.delete("/comments/:commentId", authenticateUser, async (req, res) => {
     try {
         const comment = await Comment.findByPk(req.params.commentId);
 
@@ -486,7 +486,7 @@ app.delete("/comments/:commentId", async (req, res) => {
     }
 });
 
-app.get('/users/:userId/comments', async (req, res) => {
+app.get('/users/:userId/comments', authenticateUser, async (req, res) => {
     const {
         userId
     } = req.params;
@@ -535,7 +535,7 @@ app.get('/posts/:postId/comments', async (req, res) => {
     }
 });
 
-app.post('/posts/:postId/comments', async (req, res) => {
+app.post('/posts/:postId/comments', authenticateUser, async (req, res) => {
     const {
         postId
     } = req.params;
@@ -564,7 +564,7 @@ app.post('/posts/:postId/comments', async (req, res) => {
     }
 });
 
-app.delete('/posts/:postId/comments/:commentId', async (req, res) => {
+app.delete('/posts/:postId/comments/:commentId', authenticateUser, async (req, res) => {
     const {
         postId,
         commentId
@@ -590,8 +590,8 @@ app.delete('/posts/:postId/comments/:commentId', async (req, res) => {
             message: 'Comment deleted!'
         });
 
-    } catch (err) {
-        console.error(err);
+    } catch (error) {
+        console.error(error);
         res.status(500).json({
             message: 'An error occurred during deletion!'
         });
