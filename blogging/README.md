@@ -29,7 +29,7 @@ To set up and run the application, follow these steps:
 1. Clone the repository: `git clone https://github.com/ddamme05/TTP-Assignments.git`
 2. Navigate to the project directory: `cd \blogging\`
 3. Install dependencies: `npm install`
-4. Create a database for the program.
+4. Create a database for the program in `PostgreSQL`.
 5. Configure the database connection by creating the `.env` file.
 6. Run the database migrations: `npx sequelize-cli db:migrate`
 7. Run the seed data: `npx sequelize-cli db:seed:all`
