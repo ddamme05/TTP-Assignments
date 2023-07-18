@@ -496,7 +496,9 @@ app.get('/users/:userId/comments', async (req, res) => {
             include: {
                 model: User,
                 as: 'author',
-                where:  { id: userId},
+                where: {
+                    id: userId
+                },
                 attributes: ['name', 'email']
             }
         });
@@ -506,8 +508,59 @@ app.get('/users/:userId/comments', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            message: "Failed to retrieve comments for the user.",
+            message: "Failed to retrieve comments from the user.",
         })
+    }
+});
+
+app.get('/posts/:postId/comments', async (req, res) => {
+    const {
+        postId
+    } = req.params;
+
+    try {
+        const comments = await Comment.findAll({
+            where: {
+                postId
+            }
+        });
+
+        res.json(comments);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to retrieve comments from the post'
+        });
+    }
+});
+
+app.post('/posts/:postId/comments', async (req, res) => {
+    const {
+        postId
+    } = req.params;
+    const {
+        body,
+        authorId
+    } = req.body;
+
+    try {
+        const comment = await Comment.create({
+            body,
+            postId,
+            authorId
+        });
+
+        res.status(201).json({
+            message: `Comment created successfully for postId ${postId}`,
+            body,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to create a comment in post.'
+        });
     }
 });
 
