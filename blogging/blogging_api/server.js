@@ -7,14 +7,18 @@ const cors = require("cors");
 const authRouter = require("./routes/auth");
 const postsRouter = require("./routes/posts");
 const commentsRouter = require("./routes/comments");
+const {
+    forbiddenErrorHandler,
+    notFoundErrorHandler,
+} = require("./middleware/errorHandlers");
 
 app.use(
     cors({
-      origin: "http://127.0.0.1:5173",
-      allowHeaders: ["Content-Type", "Authorization"],
-      method: ["GET", "POST", "PUT", "DELETE"],
+        origin: "http://127.0.0.1:5173",
+        allowHeaders: ["Content-Type", "Authorization"],
+        method: ["GET", "POST", "PUT", "DELETE"],
     })
-  );
+);
 
 app.use((req, res, next) => {
     console.log(`Request: ${req.method} ${req.originalUrl}`);

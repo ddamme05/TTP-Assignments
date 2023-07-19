@@ -14,6 +14,7 @@ const {
     NotFoundError
 } = require("../errors");
 
+
 const getPost = async (id) => {
     const post = await Post.findByPk(parseInt(id, 10));
     if (!post) {

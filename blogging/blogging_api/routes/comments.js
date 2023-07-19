@@ -14,6 +14,7 @@ const {
     NotFoundError
 } = require("../errors");
 
+
 const getComment = async (id) => {
     const comment = await comment.findByPk(parseInt(id, 10));
     if (!comment) {
