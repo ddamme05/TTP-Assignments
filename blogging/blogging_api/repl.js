@@ -2,7 +2,7 @@ const repl = require("repl");
 const db = require("./models");
 
 const replServer = repl.start({
-  prompt: "job-app-tracker > "
+  prompt: "blogging > "
 });
 
 for (let modelName in db) {

@@ -1,11 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const { User } = require("../models");
-const { authenticateUser } = require("../middleware/auth"); 
+const {
+    User
+} = require("../models");
+const {
+    authenticateUser
+} = require("../middleware/auth");
 
-router.get("/", (req, res) => {
-    res.send("Welcome to the Blog!");
+router.get("/current_user", async (req, res) => {
+    if (req.session.userId) {
+        const user = await User.findByPk(req.session.userId);
+        return res.status(200).json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            }
+        });
+    } else {
+        return res.status(401).json({
+            user: null
+        })
+    }
 });
 
 router.post('/signup', async (req, res) => {

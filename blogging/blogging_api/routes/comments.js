@@ -1,14 +1,46 @@
 const express = require("express");
 const app = express();
-const port = 4000;
-const session = require("express-session");
 const {
     Post,
     Comment,
     User
-} = require("./models");
+} = require("../models");
 require("dotenv").config();
-const { authenticateUser } = require("../middleware/auth"); 
+const {
+    authenticateUser
+} = require("../middleware/auth");
+const {
+    ForbiddenError,
+    NotFoundError
+} = require("../errors");
+
+const getComment = async (id) => {
+    const comment = await comment.findByPk(parseInt(id, 10));
+    if (!comment) {
+        throw new NotFoundError("comment not found");
+    }
+    return comment;
+};
+
+const authorizeModification = (session, comment) => {
+    if (parseInt(session.userId, 10) !== comment.UserId) {
+        throw new ForbiddenError("You are not authorized to delete this comment");
+    }
+};
+
+const handleErrors = (err, res) => {
+    console.error(err);
+    if (err.name === "SequelizeValidationError") {
+        return res
+            .status(422)
+            .json({
+                errors: err.errors.map((e) => e.message).join(", ")
+            });
+    }
+    res.status(500).send({
+        errors: err.message
+    });
+};
 
 
 app.post("/comments", authenticateUser, async (req, res) => {
