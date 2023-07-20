@@ -1,54 +1,16 @@
 const express = require("express");
-const app = express();
+const router = express();
 const {
     Post,
     Comment,
     User
-} = require("./models");
+} = require("../models");
 require("dotenv").config();
 const {
     authenticateUser
 } = require("../middleware/auth");
-const {
-    ForbiddenError,
-    NotFoundError
-} = require("../errors");
 
-
-const getPost = async (id) => {
-    const post = await Post.findByPk(parseInt(id, 10));
-    if (!post) {
-        throw new NotFoundError("Post not found.");
-    }
-    return post;
-};
-
-const authorizeEdit = (session, post) => {
-    if (parseInt(session.userId, 10) !== post.UserId) {
-        throw new ForbiddenError("You are not authorized to edit this post");
-    }
-}
-
-const authorizeDelete = (session, post) => {
-    if (parseInt(session.userId, 10) !== post.UserId) {
-        throw new ForbiddenError("You are not authorized to delete this post");
-    }
-}
-
-const handleErrors = (err, res) => {
-    console.error(err);
-    if (err.name === "SequelizeValidationError") {
-        return res.status(422).json({
-            errors: err.errors.map((e) => e.message).join(", ")
-        });
-    }
-    res.status(500).send({
-        errors: err.message
-    });
-}
-
-
-app.get("/posts", async (req, res) => {
+router.get("/", authenticateUser, async (req, res) => {
     const {
         withComments,
         withUser
@@ -138,7 +100,7 @@ app.get("/posts", async (req, res) => {
 });
 
 
-app.post("/posts", authenticateUser, async (req, res) => {
+router.post("/", authenticateUser, async (req, res) => {
     try {
         const post = await Post.create({
             title: req.body.title,
@@ -169,7 +131,7 @@ app.post("/posts", authenticateUser, async (req, res) => {
     }
 });
 
-app.get("/posts/:id", async (req, res) => {
+router.get("/:id", authenticateUser, async (req, res) => {
     try {
         const post = await Post.findByPk(req.params.id, {
             include: [{
@@ -194,7 +156,7 @@ app.get("/posts/:id", async (req, res) => {
     }
 });
 
-app.put("/posts/:id", authenticateUser, async (req, res) => {
+router.put("/:id", authenticateUser, async (req, res) => {
     try {
         const post = await Post.findByPk(req.params.id);
 
@@ -233,7 +195,7 @@ app.put("/posts/:id", authenticateUser, async (req, res) => {
     }
 });
 
-app.delete("/posts/:id", authenticateUser, async (req, res) => {
+router.delete("/:id", authenticateUser, async (req, res) => {
     try {
         const post = await Post.findByPk(req.params.id);
 
@@ -258,6 +220,91 @@ app.delete("/posts/:id", authenticateUser, async (req, res) => {
         console.error(error);
         res.status(500).json({
             message: "Failed to delete the post."
+        });
+    }
+});
+
+router.get("/:postId/comments", authenticateUser, async (req, res) => {
+    try {
+        const comments = await Comment.findAll({
+            where: {
+                postId: req.params.postId
+            },
+            include: [{
+                model: User,
+                as: "author",
+                attributes: ["name", "email"]
+            }],
+        });
+
+        res.status(200).json(comments);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Failed to retrieve comments."
+        });
+    }
+});
+
+router.post('/:postId/comments', authenticateUser, async (req, res) => {
+    const {
+        postId
+    } = req.params;
+    const {
+        body,
+        authorId
+    } = req.body;
+
+    try {
+        const comment = await Comment.create({
+            body,
+            postId,
+            authorId
+        });
+
+        res.status(201).json({
+            message: `Comment created successfully for postId ${postId}`,
+            body,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Failed to create a comment in post.'
+        });
+    }
+});
+
+router.delete('/:postId/comments/:commentId', authenticateUser, async (req, res) => {
+    const {
+        postId,
+        commentId
+    } = req.params;
+
+    try {
+        const comment = await Comment.findOne({
+            where: {
+                id: commentId,
+                postId
+            }
+        });
+
+        if (!comment) {
+            return res.status(404).json({
+                message: 'Comment not found.'
+            });
+        }
+
+        await comment.destroy();
+
+        res.status(200).json({
+            message: 'Comment deleted!'
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'An error occurred during deletion!'
         });
     }
 });
